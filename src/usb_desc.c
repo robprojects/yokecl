@@ -196,12 +196,12 @@ uint8_t CustomHID_ReportDescriptor[CUSTOMHID_SIZ_REPORT_DESC] =
 		0x05, 0x01,                    // 	USAGE_PAGE (Generic Desktop)
 		0x09, 0x30,                    //   USAGE (X)
     0x09, 0x31,                    //   USAGE (Y)
-    0x09, 0x32,                    //   USAGE (Z)
-    0x09, 0x33,                    //   USAGE (Rx)
-    0x09, 0x34,                    //   USAGE (Ry)
-    0x09, 0x35,                    //   USAGE (Rz)
-		0x09, 0x36,                    //   USAGE (Slider)
-		0x09, 0x37,                    //  	USAGE (Slider)
+    0x09, 0x32,                    //   USAGE (Z) - throttle
+    0x09, 0x33,                    //   USAGE (Rx) - mixture
+    //0x09, 0x34,                    //   USAGE (Ry)
+    //0x09, 0x35,                    //   USAGE (Rz)
+	//	0x09, 0x36,                    //   USAGE (Slider)
+	//	0x09, 0x37,                    //  	USAGE (Slider)
     0x16, 0x01, 0x80,              //  	LOGICAL_MINIMUM (-32767)
     0x26, 0xFF, 0x7F,						   //   LOGICAL_MAXIMUM (32767)
     0x75, 0x10,                    //   REPORT_SIZE (16)

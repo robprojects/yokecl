@@ -152,11 +152,20 @@ void TIM2_IRQHandler(void) {
 				//pos+=2;
 			}
 
-			/*
-			 * TODO: Buttons. At the moment just toggle button 1 on and off...
-			 */
-			joy_report[pos++] = (ticks&0x800)?0x00 : 0x01;
-			joy_report[pos] = 0xff;
+			// flaps switch
+			int buttons = 0;
+			buttons |= (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12));
+			buttons |= (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_13)) << 1;
+
+			// carb heat
+			if (axis_filt[4] > 0) {
+				buttons |= 1<<2;
+			} else {
+				buttons |= 1<<3;
+			}
+
+			joy_report[pos++] = buttons; //(ticks&0x800)?0x00 : 0x01;
+			joy_report[pos] = 0x00;
 			USB_CUSTOM_HID_SendReport((uint8_t *)joy_report, sizeof(joy_report)/* - sizeof(joy_report.dummy)*/);
 		}
 #if 0

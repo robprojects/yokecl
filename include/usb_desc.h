@@ -66,7 +66,7 @@
 #define STANDARD_ENDPOINT_DESC_SIZE             0x09
 
 #define MAX_BUTTONS_NUM 16
-#define MAX_AXIS_NUM 8
+#define MAX_AXIS_NUM 4
 #define MAX_POVS_NUM 4
 #define REPORT_ID_JOY 1
 #define REPORT_ID_CL 2
