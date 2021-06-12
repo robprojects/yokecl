@@ -98,6 +98,8 @@ typedef int32_t fx_t;
 
 extern fx_t axis_filt[5];
 
+int carbheat = 0;
+
 void TIM2_IRQHandler(void) {
 	//static uint8_t btn_num = 0;
 	//uint8_t physical_buttons_data[MAX_BUTTONS_NUM];
@@ -158,9 +160,11 @@ void TIM2_IRQHandler(void) {
 			buttons |= (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_13)) << 1;
 
 			// carb heat
-			if (axis_filt[4] > 0) {
+			if ((axis_filt[4] > 0) && (carbheat == 0)) {
+				carbheat = 1;
 				buttons |= 1<<2;
-			} else {
+			} else if ((axis_filt[4]<=0) && (carbheat == 1)) {
+				carbheat = 0;
 				buttons |= 1<<3;
 			}
 

@@ -68,16 +68,16 @@ fx_t fast_sin(int f_pos) {
  * B0 = W / (W + 1)
  */
 
-const fx_t A1 = fx_make(0.93906);
-const fx_t B0 = fx_make(0.03047);
+const fx_t A1 = fx_make(0.96906);
+const fx_t B0 = fx_make(0.01547);
 
 fx_t axis_filt[5];
 
 uint32_t f_pos;
 
 int set_axis_torque(int axis, int torque) {
-	if ((torque > 5)) torque = 25 + torque;
-	if ((torque < -5)) torque = -25 + torque;
+	if ((torque > 5)) torque = 30 + torque;
+	if ((torque < -5)) torque = -30 + torque;
 	if (torque > 250) torque = 250;
 	if (torque < -250) torque = -250;
 
@@ -111,6 +111,16 @@ int set_axis_torque(int axis, int torque) {
 	return 0;
 }
 
+fx_t axis_vel[2];
+fx_t axis_acc[2];
+
+fx_t axis_z[2];
+fx_t axis_zz[2];
+
+static uint64_t ticks = 0;
+static uint64_t print_tick = 0;
+
+
 // 1kHz force feedback control cycle
 int ff_cycle(void) {
 	int i;
@@ -134,8 +144,26 @@ int ff_cycle(void) {
 	 * - 2x cos and 2x sin noise synthesisers (engine noise/vibration)
 	 */
 
+	// differentiate axis to get vel/acc
+	for (i=0; i<2; i++) {
+		axis_vel[i] = fx_mul(fx_sub(axis_filt[i],axis_zz[i]), fx_make(1000.0/2.0));
+		axis_acc[i] = fx_mul(
+				fx_add(fx_sub(axis_filt[i],
+					   fx_mul(fx_make(2.0), axis_z[i])),
+					   axis_zz[i]), fx_make(1000.0*1000.0));
+
+	}
+
 	// set motor aileron
-	int torque = -fx_fx2int(axis_filt[0])*2;
+
+	// spring
+	fx_t torque = -axis_filt[0];
+
+	// damping
+	torque = fx_add(torque, fx_mul(-axis_vel[0], fx_make(0.1)));
+
+	// inertia
+
 
 	// currently there is just one sin wave synthesizer on one axis to test the principle
 	// plan is to have 2x cos and 2x sin per axis
@@ -144,14 +172,30 @@ int ff_cycle(void) {
 	// position in the (single) sine wave
 	f_pos += 10;
 
-	torque += vibe;
+	//torque += vibe;
 
-	set_axis_torque(0, torque);
+	set_axis_torque(0, fx_fx2int(torque));
 
 	// set motor elevator
-	int torquer = fx_fx2int(axis_filt[1])/5;
+	int torquer = fx_fx2int(axis_filt[1])/4.0;
 
 	set_axis_torque(1, torquer);
+
+#if 0
+	if ((ticks - print_tick) > 1000) {
+		print_tick = ticks;
+		printf("pos %d vel %d acc %d\n", fx_fx2int(axis_filt[0]), fx_fx2int(axis_vel[0]), fx_fx2int(axis_acc[0]));
+		printf("%d %d\n", fx_fx2int(axis_filt[0]), fx_fx2int(axis_zz[0]));
+	}
+#endif
+
+	for (i=0; i<2; i++) {
+		// delay
+		axis_zz[i] = axis_z[i];
+		axis_z[i] = axis_filt[i];
+	}
+
+	ticks++;
 
 	return 0;
 }
