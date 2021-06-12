@@ -68,8 +68,8 @@ fx_t fast_sin(int f_pos) {
  * B0 = W / (W + 1)
  */
 
-const fx_t A1 = fx_make(0.96906);
-const fx_t B0 = fx_make(0.01547);
+const fx_t A1 = fx_make(0.993736);
+const fx_t B0 = fx_make(0.003132);
 
 fx_t axis_filt[5];
 
@@ -160,19 +160,19 @@ int ff_cycle(void) {
 	fx_t torque = -axis_filt[0];
 
 	// damping
-	torque = fx_add(torque, fx_mul(-axis_vel[0], fx_make(0.1)));
+	torque = fx_add(torque, fx_mul(-axis_vel[0], fx_make(0.20)));
 
 	// inertia
 
 
 	// currently there is just one sin wave synthesizer on one axis to test the principle
 	// plan is to have 2x cos and 2x sin per axis
-	int vibe = fx_fx2int(fx_mul(fast_sin(f_pos), fx_make(100)));
+	fx_t vibe = fx_mul(fast_sin(f_pos), fx_make(50));
 
 	// position in the (single) sine wave
 	f_pos += 10;
 
-	//torque += vibe;
+	torque = fx_add(torque, vibe);
 
 	set_axis_torque(0, fx_fx2int(torque));
 
